@@ -8,20 +8,18 @@ def chat_fn(message, history):
     if history is None:
         history = []
 
-    # OpenAI chat messages
     messages = [{"role": "system", "content": "You are a helpful assistant."}] + history + [{"role": "user", "content": message}]
 
-    # Call OpenAI
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages
         )
-        reply = response.choices[0].message["content"]
+        reply = response.choices[0].message.content  # <-- FIXED
     except Exception as e:
         reply = f"Error: {str(e)}"
 
-    # Append the new message and reply as dictionaries
+    # Store history as dictionaries
     history.append({"role": "user", "content": message})
     history.append({"role": "assistant", "content": reply})
 
