@@ -33,6 +33,5 @@ with gr.Blocks() as demo:
 demo.launch(server_name="0.0.0.0", server_port=10000)
 
 
-    txt.submit(chat_with_ai, [txt, state], [chatbot, state])
 
 demo.launch(server_name="0.0.0.0", server_port=10000)
