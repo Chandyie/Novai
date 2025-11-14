@@ -1,43 +1,35 @@
-# app.py
-import gradio as gr
 import os
+import gradio as gr
 from openai import OpenAI
 
-# Initialize OpenAI client
+# Make sure you set your OPENAI_API_KEY in Render environment variables
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Chat function
 def chat_fn(message, history):
-    # Append user message to history
-    history.append({"role": "user", "content": message})
-
-    # Send conversation to OpenAI
     response = client.chat.completions.create(
-        model="gpt-4o-mini",  # replace with your preferred model
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            *history
+            *history,
+            {"role": "user", "content": message}
         ]
     )
-
+    
     reply = response.choices[0].message["content"]
-    # Append AI response to history
+    # append new messages to history
+    history.append({"role": "user", "content": message})
     history.append({"role": "assistant", "content": reply})
-    # Return formatted tuples for Gradio
-    formatted_history = [(h["role"], h["content"]) for h in history if h["role"] in ["user", "assistant"]]
-    return formatted_history, history
+    return history, history
 
-# Gradio interface
 with gr.Blocks() as demo:
-    chatbot = gr.Chatbot(label="Charlie", type="messages")
-    msg = gr.Textbox(label="Type your message", placeholder="Say something...")
+    chatbot = gr.Chatbot(type="messages")
+    msg = gr.Textbox(label="Say something")
     send_btn = gr.Button("Send")
 
-    # Define click and enter behavior
-    send_btn.click(chat_fn, [msg, chatbot], [chatbot, chatbot])
+    # submit or click both trigger chat
     msg.submit(chat_fn, [msg, chatbot], [chatbot, chatbot])
+    send_btn.click(chat_fn, [msg, chatbot], [chatbot, chatbot])
 
-# Launch
 demo.launch(server_name="0.0.0.0", server_port=10000)
 
 
